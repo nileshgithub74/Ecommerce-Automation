@@ -1,0 +1,238 @@
+{
+  "users": {
+    "valid": [
+      {
+        "email": "test.user1@example.com",
+        "password": "SecurePass123!",
+        "firstName": "Test",
+        "lastName": "User",
+        "phone": "+1234567890"
+      },
+      {
+        "email": "test.user2@example.com",
+        "password": "StrongPass456!",
+        "firstName": "Jane",
+        "lastName": "Doe",
+        "phone": "+0987654321"
+      }
+    ],
+    "invalid": [
+      {
+        "email": "invalid-email",
+        "password": "weak",
+        "expectedError": "Invalid email format"
+      },
+      {
+        "email": "test@example.com",
+        "password": "",
+        "expectedError": "Password is required"
+      },
+      {
+        "email": "",
+        "password": "ValidPass123!",
+        "expectedError": "Email is required"
+      }
+    ]
+  },
+  "products": [
+    {
+      "id": "prod-001",
+      "name": "Wireless Bluetooth Headphones",
+      "category": "Electronics",
+      "price": 99.99,
+      "description": "High-quality wireless headphones with noise cancellation",
+      "inStock": true,
+      "sizes": ["One Size"],
+      "colors": ["Black", "White", "Blue"]
+    },
+    {
+      "id": "prod-002",
+      "name": "Running Shoes",
+      "category": "Sports & Outdoors",
+      "price": 129.99,
+      "description": "Comfortable running shoes for all terrains",
+      "inStock": true,
+      "sizes": ["7", "8", "9", "10", "11"],
+      "colors": ["Black", "White", "Red"]
+    },
+    {
+      "id": "prod-003",
+      "name": "Coffee Mug",
+      "category": "Home & Kitchen",
+      "price": 19.99,
+      "description": "Ceramic coffee mug with ergonomic handle",
+      "inStock": true,
+      "sizes": ["12oz", "16oz"],
+      "colors": ["White", "Black", "Blue"]
+    },
+    {
+      "id": "prod-004",
+      "name": "Laptop Backpack",
+      "category": "Bags & Luggage",
+      "price": 79.99,
+      "description": "Durable laptop backpack with multiple compartments",
+      "inStock": false,
+      "sizes": ["One Size"],
+      "colors": ["Black", "Gray"]
+    }
+  ],
+  "promoCodes": {
+    "valid": [
+      {
+        "code": "SAVE10",
+        "discount": "10%",
+        "description": "10% off your order"
+      },
+      {
+        "code": "WELCOME20",
+        "discount": "20%",
+        "description": "20% off for new customers"
+      },
+      {
+        "code": "FREESHIP",
+        "discount": "Free Shipping",
+        "description": "Free shipping on orders over $50"
+      }
+    ],
+    "invalid": [
+      {
+        "code": "EXPIRED",
+        "error": "This promo code has expired"
+      },
+      {
+        "code": "INVALID123",
+        "error": "Invalid promo code"
+      },
+      {
+        "code": "USED",
+        "error": "This promo code has already been used"
+      }
+    ]
+  },
+  "searchTerms": {
+    "valid": [
+      "headphones",
+      "shoes",
+      "laptop",
+      "coffee",
+      "backpack"
+    ],
+    "partialMatch": [
+      "head",
+      "run",
+      "mug"
+    ],
+    "noResults": [
+      "nonexistentproduct123",
+      "xyz999",
+      "invaliditem"
+    ],
+    "specialCharacters": [
+      "!@#$%",
+      "<script>",
+      "'; DROP TABLE products; --"
+    ]
+  },
+  "shippingAddresses": [
+    {
+      "firstName": "John",
+      "lastName": "Doe",
+      "address1": "123 Main Street",
+      "address2": "Apt 4B",
+      "city": "New York",
+      "state": "NY",
+      "zipCode": "10001",
+      "country": "United States",
+      "phone": "+1234567890"
+    },
+    {
+      "firstName": "Jane",
+      "lastName": "Smith",
+      "address1": "456 Oak Avenue",
+      "address2": "",
+      "city": "Los Angeles",
+      "state": "CA",
+      "zipCode": "90210",
+      "country": "United States",
+      "phone": "+0987654321"
+    }
+  ],
+  "paymentInfo": {
+    "validCards": [
+      {
+        "cardNumber": "4242424242424242",
+        "expiryMonth": "12",
+        "expiryYear": "25",
+        "cvv": "123",
+        "cardholderName": "John Doe",
+        "cardType": "Visa"
+      },
+      {
+        "cardNumber": "5555555555554444",
+        "expiryMonth": "11",
+        "expiryYear": "26",
+        "cvv": "456",
+        "cardholderName": "Jane Smith",
+        "cardType": "Mastercard"
+      }
+    ],
+    "invalidCards": [
+      {
+        "cardNumber": "4242424242424241",
+        "expiryMonth": "12",
+        "expiryYear": "25",
+        "cvv": "123",
+        "cardholderName": "John Doe",
+        "expectedError": "Invalid card number"
+      },
+      {
+        "cardNumber": "4242424242424242",
+        "expiryMonth": "13",
+        "expiryYear": "25",
+        "cvv": "123",
+        "cardholderName": "John Doe",
+        "expectedError": "Invalid expiry month"
+      },
+      {
+        "cardNumber": "4242424242424242",
+        "expiryMonth": "12",
+        "expiryYear": "20",
+        "cvv": "123",
+        "cardholderName": "John Doe",
+        "expectedError": "Card has expired"
+      }
+    ]
+  },
+  "categories": [
+    "Electronics",
+    "Sports & Outdoors",
+    "Home & Kitchen",
+    "Bags & Luggage",
+    "Clothing",
+    "Books",
+    "Toys & Games",
+    "Health & Beauty"
+  ],
+  "filters": {
+    "priceRanges": [
+      { "min": 0, "max": 25, "label": "Under $25" },
+      { "min": 25, "max": 50, "label": "$25 - $50" },
+      { "min": 50, "max": 100, "label": "$50 - $100" },
+      { "min": 100, "max": 200, "label": "$100 - $200" },
+      { "min": 200, "max": 999999, "label": "Over $200" }
+    ],
+    "brands": [
+      "BrandA",
+      "BrandB",
+      "BrandC",
+      "Generic"
+    ],
+    "ratings": [
+      { "stars": 5, "label": "5 stars" },
+      { "stars": 4, "label": "4 stars & up" },
+      { "stars": 3, "label": "3 stars & up" },
+      { "stars": 2, "label": "2 stars & up" },
+      { "stars": 1, "label": "1 star & up" }
+    ]
+  }
+}
