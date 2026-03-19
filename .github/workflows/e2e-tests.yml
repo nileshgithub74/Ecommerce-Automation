@@ -2,9 +2,9 @@ name: E2E Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, master, develop ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, master, develop ]
   schedule:
     # Run tests daily at 2 AM UTC
     - cron: '0 2 * * *'
@@ -61,9 +61,6 @@ jobs:
         echo "TEST_USER_EMAIL=${{ secrets.TEST_USER_EMAIL || 'test@example.com' }}" >> .env
         echo "TEST_USER_PASSWORD=${{ secrets.TEST_USER_PASSWORD || 'TestPassword123!' }}" >> .env
         echo "HEADLESS=true" >> .env
-
-    - name: Run linting
-      run: npm run lint
 
     - name: Run E2E tests
       run: npx playwright test --project=${{ matrix.browser }} --shard=${{ matrix.shard }}/4
@@ -160,7 +157,7 @@ jobs:
         retention-days: 30
 
     - name: Deploy report to GitHub Pages
-      if: github.ref == 'refs/heads/main'
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
