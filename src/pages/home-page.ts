@@ -2,57 +2,43 @@ import { Page, Locator } from '@playwright/test';
 import { BasePage } from './base-page';
 
 export class HomePage extends BasePage {
-  // Locators
+  // Actual locators matching the real app
   private get logo(): Locator {
-    return this.page.locator('[data-testid="logo"], .logo, header img');
+    return this.page.locator('a[href="/"] span, a[href="/"] img').first();
   }
 
-  private get searchInput(): Locator {
-    return this.page.locator('[data-testid="search-input"], input[type="search"], .search-input');
+  private get navMenu(): Locator {
+    return this.page.locator('nav ul');
   }
 
-  private get searchButton(): Locator {
-    return this.page.locator('[data-testid="search-button"], .search-button, button[type="submit"]');
-  }
-
-  private get loginLink(): Locator {
-    return this.page.locator('[data-testid="login-link"], a[href*="login"], .login-link');
-  }
-
-  private get signupLink(): Locator {
-    return this.page.locator('[data-testid="signup-link"], a[href*="signup"], .signup-link');
+  private get loginButton(): Locator {
+    return this.page.locator('button', { hasText: 'Login' }).first();
   }
 
   private get cartIcon(): Locator {
-    return this.page.locator('[data-testid="cart-icon"], .cart-icon, a[href*="cart"]');
+    return this.page.locator('a[href="/cart"]');
   }
 
   private get cartCount(): Locator {
-    return this.page.locator('[data-testid="cart-count"], .cart-count, .cart-badge');
+    return this.page.locator('nav').locator('text=/^\\d+$/').first();
   }
 
-  private get userMenu(): Locator {
-    return this.page.locator('[data-testid="user-menu"], .user-menu, .account-menu');
+  private get productItems(): Locator {
+    // Site uses Tailwind card divs with product links — no .item class
+    return this.page.locator('div.group').filter({ has: this.page.locator('a[href*="/product/"]') });
   }
 
-  private get categoryMenu(): Locator {
-    return this.page.locator('[data-testid="category-menu"], .category-menu, nav');
+  private get heroSection(): Locator {
+    return this.page.locator('section').first();
   }
 
-  private get featuredProducts(): Locator {
-    return this.page.locator('[data-testid="featured-products"], .featured-products, .product-grid');
+  private get newCollectionSection(): Locator {
+    // New collections section identified by heading text
+    return this.page.locator('section, div').filter({ hasText: /new collections/i }).first();
   }
 
-  private get productCards(): Locator {
-    return this.page.locator('[data-testid="product-card"], .product-card, .product-item');
-  }
-
-  private get newsletterSignup(): Locator {
-    return this.page.locator('[data-testid="newsletter-signup"], .newsletter-signup');
-  }
-
-  private get footer(): Locator {
-    return this.page.locator('footer, [data-testid="footer"]');
+  private get newsletterSection(): Locator {
+    return this.page.locator('section, div').filter({ has: this.page.locator('input[type="email"]') }).last();
   }
 
   constructor(page: Page) {
@@ -61,30 +47,16 @@ export class HomePage extends BasePage {
 
   async isLoaded(): Promise<boolean> {
     try {
-      await this.logo.waitFor({ state: 'visible', timeout: 10000 });
-      await this.searchInput.waitFor({ state: 'visible', timeout: 10000 });
+      await this.page.locator('nav').waitFor({ state: 'visible', timeout: 10000 });
       return true;
     } catch {
       return false;
     }
   }
 
-  async searchForProduct(searchTerm: string): Promise<void> {
-    this.logger.info(`Searching for product: ${searchTerm}`);
-    await this.fillElement(this.searchInput, searchTerm);
-    await this.clickElement(this.searchButton);
-    await this.waitForPageLoad();
-  }
-
   async clickLogin(): Promise<void> {
-    this.logger.info('Clicking login link');
-    await this.clickElement(this.loginLink);
-    await this.waitForPageLoad();
-  }
-
-  async clickSignup(): Promise<void> {
-    this.logger.info('Clicking signup link');
-    await this.clickElement(this.signupLink);
+    this.logger.info('Clicking login button');
+    await this.clickElement(this.loginButton);
     await this.waitForPageLoad();
   }
 
@@ -103,89 +75,50 @@ export class HomePage extends BasePage {
     }
   }
 
-  async clickUserMenu(): Promise<void> {
-    this.logger.info('Clicking user menu');
-    await this.clickElement(this.userMenu);
-  }
-
-  async selectCategory(categoryName: string): Promise<void> {
-    this.logger.info(`Selecting category: ${categoryName}`);
-    const categoryLink = this.page.locator(`a:has-text("${categoryName}")`);
-    await this.clickElement(categoryLink);
+  async clickProductByIndex(index: number): Promise<void> {
+    this.logger.info(`Clicking product at index: ${index}`);
+    // Navigate directly to product/1 — product page requires auth anyway
+    const productLink = this.page.locator('a[href*="/product/"]').nth(index);
+    const href = await productLink.getAttribute('href');
+    await this.page.goto(href || '/product/1');
     await this.waitForPageLoad();
   }
 
   async getFeaturedProducts(): Promise<string[]> {
-    this.logger.info('Getting featured products');
-    await this.featuredProducts.waitFor({ state: 'visible' });
-    const productNames: string[] = [];
-    
-    const products = await this.productCards.all();
-    for (const product of products) {
-      const nameElement = product.locator('.product-name, [data-testid="product-name"]');
-      const name = await this.getText(nameElement);
-      if (name) {
-        productNames.push(name);
-      }
+    this.logger.info('Getting product names');
+    const names: string[] = [];
+    const items = await this.productItems.all();
+    for (const item of items) {
+      const name = await item.locator('p').first().textContent();
+      if (name) names.push(name.trim());
     }
-    
-    return productNames;
+    return names;
   }
 
-  async clickProductByName(productName: string): Promise<void> {
-    this.logger.info(`Clicking product: ${productName}`);
-    const productCard = this.page.locator(`[data-testid="product-card"]:has-text("${productName}")`);
-    await this.clickElement(productCard);
+  async getProductCount(): Promise<number> {
+    return await this.productItems.count();
+  }
+
+  async selectCategory(category: 'mens' | 'womens' | 'kids'): Promise<void> {
+    this.logger.info(`Selecting category: ${category}`);
+    const map: Record<string, string> = { mens: 'Men', womens: 'Women', kids: 'Kids' };
+    const link = this.navMenu.locator(`a[href="/${category}"]`);
+    await this.clickElement(link);
     await this.waitForPageLoad();
   }
 
-  async clickProductByIndex(index: number): Promise<void> {
-    this.logger.info(`Clicking product at index: ${index}`);
-    const productCard = this.productCards.nth(index);
-    await this.clickElement(productCard);
-    await this.waitForPageLoad();
+  async scrollToNewCollection(): Promise<void> {
+    await this.newCollectionSection.scrollIntoViewIfNeeded();
   }
 
-  async subscribeToNewsletter(email: string): Promise<void> {
-    this.logger.info(`Subscribing to newsletter with email: ${email}`);
-    const emailInput = this.newsletterSignup.locator('input[type="email"]');
-    const subscribeButton = this.newsletterSignup.locator('button, input[type="submit"]');
-    
-    await this.fillElement(emailInput, email);
-    await this.clickElement(subscribeButton);
+  async subscribeNewsletter(email: string): Promise<void> {
+    const input = this.newsletterSection.locator('input[type="email"]');
+    const btn = this.newsletterSection.locator('button');
+    await this.fillElement(input, email);
+    await this.clickElement(btn);
   }
 
-  async verifyHomePageElements(): Promise<void> {
-    this.logger.info('Verifying home page elements');
-    await this.logo.waitFor({ state: 'visible' });
-    await this.searchInput.waitFor({ state: 'visible' });
-    await this.loginLink.waitFor({ state: 'visible' });
-    await this.cartIcon.waitFor({ state: 'visible' });
-  }
-
-  async getAvailableCategories(): Promise<string[]> {
-    this.logger.info('Getting available categories');
-    const categories: string[] = [];
-    const categoryLinks = this.categoryMenu.locator('a');
-    
-    const count = await categoryLinks.count();
-    for (let i = 0; i < count; i++) {
-      const categoryText = await this.getText(categoryLinks.nth(i));
-      if (categoryText) {
-        categories.push(categoryText);
-      }
-    }
-    
-    return categories;
-  }
-
-  async scrollToFeaturedProducts(): Promise<void> {
-    this.logger.info('Scrolling to featured products section');
-    await this.featuredProducts.scrollIntoViewIfNeeded();
-  }
-
-  async scrollToFooter(): Promise<void> {
-    this.logger.info('Scrolling to footer');
-    await this.footer.scrollIntoViewIfNeeded();
+  async waitForPageLoad(): Promise<void> {
+    await this.page.waitForLoadState('domcontentloaded');
   }
 }

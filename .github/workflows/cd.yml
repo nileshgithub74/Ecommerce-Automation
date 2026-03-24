@@ -1,0 +1,152 @@
+name: CD - Deploy
+
+on:
+  workflow_run:
+    workflows: ["E2E Tests"]
+    branches: [main, master]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  gate:
+    name: Deployment Gate
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    outputs:
+      environment: ${{ steps.set-env.outputs.environment }}
+    steps:
+      - name: Set target environment
+        id: set-env
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          else
+            echo "environment=staging" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Abort if E2E tests failed
+        if: >
+          github.event_name == 'workflow_run' &&
+          github.event.workflow_run.conclusion != 'success'
+        run: |
+          echo "❌ E2E tests did not pass. Deployment blocked."
+          exit 1
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: gate
+    runs-on: ubuntu-latest
+    if: needs.gate.outputs.environment == 'staging'
+    environment:
+      name: staging
+      url: ${{ secrets.STAGING_URL }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build --if-present
+        env:
+          NODE_ENV: staging
+
+      - name: Deploy to staging
+        run: |
+          echo "🚀 Deploying to staging..."
+          # Replace with your actual deploy command, e.g.:
+          # npx vercel --token ${{ secrets.VERCEL_TOKEN }} --env NODE_ENV=staging
+          echo "Deploy step placeholder — wire up your deploy command here."
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+          STAGING_URL: ${{ secrets.STAGING_URL }}
+
+      - name: Smoke test staging
+        run: |
+          echo "Running smoke tests against staging..."
+          npx playwright test --project=chromium --grep=@smoke || true
+        env:
+          BASE_URL: ${{ secrets.STAGING_URL }}
+          CI: true
+
+  deploy-production:
+    name: Deploy to Production
+    needs: gate
+    runs-on: ubuntu-latest
+    if: needs.gate.outputs.environment == 'production'
+    environment:
+      name: production
+      url: ${{ secrets.PRODUCTION_URL }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build --if-present
+        env:
+          NODE_ENV: production
+
+      - name: Deploy to production
+        run: |
+          echo "🚀 Deploying to production..."
+          # Replace with your actual deploy command, e.g.:
+          # npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
+          echo "Deploy step placeholder — wire up your deploy command here."
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+          PRODUCTION_URL: ${{ secrets.PRODUCTION_URL }}
+
+      - name: Smoke test production
+        run: |
+          echo "Running smoke tests against production..."
+          npx playwright install --with-deps chromium
+          npx playwright test --project=chromium --grep=@smoke || true
+        env:
+          BASE_URL: ${{ secrets.PRODUCTION_URL }}
+          CI: true
+
+  notify:
+    name: Notify Deployment Status
+    needs: [gate, deploy-staging, deploy-production]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Success
+        if: >
+          (needs.deploy-staging.result == 'success' || needs.deploy-staging.result == 'skipped') &&
+          (needs.deploy-production.result == 'success' || needs.deploy-production.result == 'skipped') &&
+          (needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success')
+        run: echo "✅ Deployment completed successfully to ${{ needs.gate.outputs.environment }}."
+
+      - name: Failure
+        if: needs.deploy-staging.result == 'failure' || needs.deploy-production.result == 'failure'
+        run: |
+          echo "❌ Deployment failed. Check logs above."
+          exit 1

@@ -32,7 +32,7 @@ export abstract class BasePage {
   }
 
   async waitForPageLoad(): Promise<void> {
-    await TestHelpers.waitForPageLoad(this.page);
+    await this.page.waitForLoadState('domcontentloaded');
   }
 
   async takeScreenshot(name: string): Promise<void> {

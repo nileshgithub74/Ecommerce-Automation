@@ -65,6 +65,7 @@ export const test = base.extend<{
 });
 
 // Custom expect extensions
+
 expect.extend({
   async toBeInRange(received: number, min: number, max: number) {
     const pass = received >= min && received <= max;
@@ -205,18 +206,15 @@ export const testData = {
 
 // Test hooks for setup and teardown
 export const testHooks = {
-  beforeEach: async ({ page, logger }) => {
-    logger.info('Starting test case');
-    await page.goto(config.baseUrl);
+  beforeEach: async (page: import('@playwright/test').Page) => {
+    await page.goto('/');
   },
 
-  afterEach: async ({ page, logger }, testInfo) => {
+  afterEach: async (page: import('@playwright/test').Page, testInfo: import('@playwright/test').TestInfo) => {
     if (testInfo.status !== testInfo.expectedStatus) {
-      logger.error(`Test failed: ${testInfo.title}`);
       const screenshot = await page.screenshot();
       await testInfo.attach('screenshot', { body: screenshot, contentType: 'image/png' });
     }
-    logger.info('Test case completed');
   },
 };
 

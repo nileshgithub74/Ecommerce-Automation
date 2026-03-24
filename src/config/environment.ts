@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const config = {
-  baseUrl: process.env.BASE_URL || 'https://demo-ecommerce.com',
+  baseUrl: process.env.BASE_URL || 'https://ecommerce-react-2024-frontendss.vercel.app',
   headless: process.env.HEADLESS !== 'false',
   timeout: parseInt(process.env.TIMEOUT || '30000'),
   retries: parseInt(process.env.RETRIES || '1'),
@@ -28,7 +28,7 @@ export const config = {
   },
   
   api: {
-    baseUrl: process.env.API_BASE_URL || 'https://api.demo-ecommerce.com',
+    baseUrl: process.env.API_BASE_URL || 'http://localhost:4000',
     key: process.env.API_KEY || 'test_api_key',
   },
   
@@ -48,17 +48,17 @@ export const getEnvironmentConfig = (): typeof config => {
     case 'development':
       return {
         ...config,
-        baseUrl: 'https://dev.demo-ecommerce.com',
+        baseUrl: 'https://ecommerce-react-2024-frontendss.vercel.app',
       };
     case 'staging':
       return {
         ...config,
-        baseUrl: 'https://staging.demo-ecommerce.com',
+        baseUrl: 'https://ecommerce-react-2024-frontendss.vercel.app',
       };
     case 'production':
       return {
         ...config,
-        baseUrl: 'https://demo-ecommerce.com',
+        baseUrl: 'https://ecommerce-react-2024-frontendss.vercel.app',
       };
     default:
       return config;

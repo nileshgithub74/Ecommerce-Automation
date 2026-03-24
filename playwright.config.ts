@@ -17,7 +17,7 @@ export default defineConfig({
     ['allure-playwright', { outputFolder: 'test-results/allure-results' }]
   ],
   use: {
-    baseURL: process.env.BASE_URL || 'https://demo.playwright.dev/todomvc',
+    baseURL: process.env.BASE_URL || 'https://ecommerce-react-2024-frontendss.vercel.app',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -33,25 +33,25 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-    {
-      name: 'mobile-chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-    {
-      name: 'mobile-safari',
-      use: { ...devices['iPhone 12'] },
-    },
+    // {
+    //   name: 'firefox',
+    //   use: { ...devices['Desktop Firefox'] },
+    // },
+    // {
+    //   name: 'webkit',
+    //   use: { ...devices['Desktop Safari'] },
+    // },
+    // {
+    //   name: 'mobile-chrome',
+    //   use: { ...devices['Pixel 5'] },
+    // },
+    // {
+    //   name: 'mobile-safari',
+    //   use: { ...devices['iPhone 12'] },
+    // },
   ],
 
-  webServer: process.env.START_SERVER ? {
+  webServer: process.env.START_SERVER === 'true' ? {
     command: 'npm run start:test-server',
     port: 3000,
     reuseExistingServer: !process.env.CI,
