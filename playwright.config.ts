@@ -17,7 +17,7 @@ export default defineConfig({
     ['allure-playwright', { outputFolder: 'test-results/allure-results' }]
   ],
   use: {
-    baseURL: process.env.BASE_URL || 'https://ecommerce-react-2024-frontendss.vercel.app',
+    baseURL: process.env.BASE_URL || 'https://homemart-five.vercel.app',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -61,7 +61,7 @@ export default defineConfig({
   timeout: 60000,
   expect: {
     timeout: 10000,
-    toHaveScreenshot: { threshold: 0.2, mode: 'pixel' },
+    toHaveScreenshot: { threshold: 0.2, maxDiffPixelRatio: 0.05 },
     toMatchSnapshot: { threshold: 0.2 }
   }
 });

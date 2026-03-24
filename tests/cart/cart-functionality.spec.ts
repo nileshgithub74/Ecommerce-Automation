@@ -114,8 +114,6 @@ test.describe('Cart Functionality', () => {
 
   test('should show footer on homepage', async ({ page }) => {
     await page.locator('footer, [class*="footer"]').first().scrollIntoViewIfNeeded().catch(() => {});
-    const footer = page.locator('footer, [class*="footer"]').first();
-    const isVisible = await footer.isVisible().catch(() => false);
     // Footer may or may not exist — just verify page loaded correctly
     const bodyText = await page.locator('body').innerText();
     expect(bodyText.length).toBeGreaterThan(100);

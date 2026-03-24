@@ -101,7 +101,6 @@ export class HomePage extends BasePage {
 
   async selectCategory(category: 'mens' | 'womens' | 'kids'): Promise<void> {
     this.logger.info(`Selecting category: ${category}`);
-    const map: Record<string, string> = { mens: 'Men', womens: 'Women', kids: 'Kids' };
     const link = this.navMenu.locator(`a[href="/${category}"]`);
     await this.clickElement(link);
     await this.waitForPageLoad();

@@ -10,14 +10,7 @@ test.describe('User Authentication - Login', () => {
     await page.waitForTimeout(1500); // wait for Clerk to render
   });
 
-  // Helper: scope tab buttons to the toggle container only, avoiding Clerk's internal buttons
-  const getTabBtn = (page: import('@playwright/test').Page, name: string) =>
-    page.locator('.flex.bg-gray-100, .flex.rounded-full, [class*="toggle"], [class*="tab-container"]')
-      .getByRole('button', { name, exact: true })
-      .first()
-      // fallback: match by exact text within buttons that have rounded-full styling
-      ?? page.locator(`button.rounded-full:text-is("${name}")`);
-
+  // Tab buttons use button.rounded-full with exact text matching
   test('should display login page with Sign In / Sign Up tabs', async ({ page }) => {
     await test.step('Verify Sign In tab is visible and active', async () => {
       // Use exact text match scoped to tab-style buttons only
